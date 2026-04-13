@@ -75,6 +75,14 @@ function detectarAtrapado(){
        puntaje=puntaje+1;
        mostrarEnSpan("txtPuntaje", puntaje);
     }
+
+    if(puntaje === 3){
+            velocidadcaida = 150;
+        } else if(puntaje === 6){
+            velocidadcaida = 100;
+        } else if(puntaje === 10){
+            alert("TIENES LOS LIMONES; AHORA TE FALTA SAL Y TEQUILA");
+    }
 }
 
 function detectarPiso(){
