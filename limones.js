@@ -70,7 +70,7 @@ function detectarAtrapado(){
        limonX < personajeX+ANCHO_PERSONAJE &&
        limonY+ALTURA_LIMON>personajeY &&
        limonY < personajeY+ALTURA_PERSONAJE) {
-       //alert("Has atrapado un limon");
+       alert("Has atrapado un limon");
        aparecerLimon();
        puntaje=puntaje+1;
        mostrarEnSpan("txtPuntaje", puntaje);
@@ -79,10 +79,14 @@ function detectarAtrapado(){
 
 function detectarPiso(){
     if(limonY+ALTURA_LIMON>canvas.height-ALTURA_SUELO){
-        //alert("Has perdido una vida");
+        alert("Has perdido una vida");
         aparecerLimon();
         vidas=vidas-1;
-        mostrarEnSpan("txtVidas", vidas);
+        mostrarEnSpan("txtVidas", vidas);    
+    }
+
+    if(vidas === 0){
+        alert("GAME OVER");
     }
 }    
 
