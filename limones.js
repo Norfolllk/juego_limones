@@ -110,3 +110,16 @@ function aparecerLimon(){
     limonY=0;
     actualizarPantalla();
 }
+
+function reiniciar(){
+    clearInterval(intervalo);
+    puntaje = 0;
+    vidas = 3;
+    velocidadcaida = 200;
+    personajeX = canvas.width / 2;
+    limonX = canvas.width / 2;
+    limonY = 5;
+    mostrarEnSpan("txtPuntaje", puntaje);
+    mostrarEnSpan("txtVidas", vidas);
+    iniciar();
+}
