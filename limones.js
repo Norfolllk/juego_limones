@@ -16,7 +16,16 @@ let vidas=3;
 let velocidadcaida=200;
 let intervalo;
 
+// Load images
+let lemonImg = new Image();
+lemonImg.src = 'retro-lemon.png'; // Replace with actual path to retro lemon image
+
+let glassImg = new Image();
+glassImg.src = 'retro-glass.png'; // Replace with actual path to retro glass with ice image
+
 function iniciar(){
+    // Set canvas background to wooden table pattern
+    canvas.style.backgroundImage = "url('wooden-table.jpg')"; // Replace with actual path to wooden table image
     intervalo = setInterval(bajarLimon, velocidadcaida);
     dibujarSuelo();
     dibujarPersonaje();
@@ -24,13 +33,11 @@ function iniciar(){
 }
 
 function dibujarSuelo(){
-    ctx.fillStyle="#8B4513";
-    ctx.fillRect(0, canvas.height - ALTURA_SUELO, canvas.width, ALTURA_SUELO);
+    // Background is set via CSS, no need to draw
 }
 
 function dibujarPersonaje(){
-    ctx.fillStyle="#ffe600";
-    ctx.fillRect(personajeX, personajeY, ANCHO_PERSONAJE, ALTURA_PERSONAJE);
+    ctx.drawImage(glassImg, personajeX, personajeY, ANCHO_PERSONAJE, ALTURA_PERSONAJE);
 }
 
 function moverIzquierda(){
@@ -47,7 +54,7 @@ function actualizarPantalla(){
     limpiarCanvas();
     dibujarSuelo();
     dibujarPersonaje();
-    dibujarLimon();
+    dibujarLimon(); 
 }
 
 function limpiarCanvas(){
@@ -55,8 +62,7 @@ function limpiarCanvas(){
 }
 
 function dibujarLimon(){
-    ctx.fillStyle="#00ff00";
-    ctx.fillRect(limonX, limonY, ANCHO_LIMON, ALTURA_LIMON);
+    ctx.drawImage(lemonImg, limonX, limonY, ANCHO_LIMON, ALTURA_LIMON);
 }
 
 function bajarLimon(){
@@ -121,5 +127,6 @@ function reiniciar(){
     limonY = 5;
     mostrarEnSpan("txtPuntaje", puntaje);
     mostrarEnSpan("txtVidas", vidas);
+    actualizarPantalla
     iniciar();
 }

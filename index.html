@@ -3,24 +3,318 @@
 <head>
   <title>Caza Limones</title>
   <link rel="stylesheet" href="limones.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <script src="utils.js"></script>
 </head>
 <body onload="iniciar()">
-  <div class="contenedor">
-    <h1>Atrapar Limones</h1>
-    <p>Si del cielo te caen limones haz limonada </p>
-    <h2> Autor: Alexander Garofalo</h2>
-    <canvas id="areajuego" width="600" height="400"></canvas>
-    <div class="panel">
-      <p>Puntaje: <span id="txtPuntaje">0</span></p>
-      <p>Vidas: <span id="txtVidas">3</span></p>
-    </div>
-    <div class="botones">
-      <button onclick="moverIzquierda()">Izquierda</button>
-      <button onclick="moverDerecha()">Derecha</button>
-      <button onclick="reiniciar()">Reiniciar</button>
-    </div>
+
+  <div class="estrellas">
+    <div class="estrella"></div><div class="estrella"></div><div class="estrella"></div>
+    <div class="estrella"></div><div class="estrella"></div><div class="estrella"></div>
+    <div class="estrella"></div><div class="estrella"></div><div class="estrella"></div>
+    <div class="estrella"></div><div class="estrella"></div><div class="estrella"></div>
   </div>
+
+  <div class="contenedor">
+
+    <div class="titulo-wrapper">
+      <div class="titulo-pixel">&#127819; CAZA LIMONES &#127819;</div>
+      <div class="subtitulo-pixel">Si del cielo te caen limones... &#161;haz limonada!</div>
+      <div class="autor-pixel">&#8212; Alexander Garofalo &#8212;</div>
+    </div>
+
+    <div class="arcade-cabinet">
+
+      <div class="cabinet-top">
+        <div class="cabinet-light red"></div>
+        <div class="cabinet-light yellow"></div>
+        <div class="cabinet-light green"></div>
+      </div>
+
+      <div class="screen-bezel">
+        <div class="scanlines"></div>
+        <canvas id="areajuego" width="600" height="400"></canvas>
+      </div>
+
+      <div class="panel">
+        <div class="stat-box">
+          <span class="stat-label">PUNTAJE</span>
+          <span class="stat-value" id="txtPuntaje">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">VIDAS</span>
+          <span class="stat-value lives" id="txtVidas">3</span>
+        </div>
+      </div>
+
+      <div class="botones">
+        <button class="btn-retro btn-dir" onclick="moverIzquierda()">&#9664; IZQ</button>
+        <button class="btn-retro btn-restart" onclick="reiniciar()">&#8635; RESET</button>
+        <button class="btn-retro btn-dir" onclick="moverDerecha()">DER &#9654;</button>
+      </div>
+
+      <div class="cabinet-bottom">
+        <div class="joystick-base"><div class="joystick-stick"></div></div>
+      </div>
+
+    </div>
+
+    <div class="instrucciones">
+      <span>&#8592; &#8594; FLECHAS o BOTONES para mover</span>
+    </div>
+
+  </div>
+
   <script src="limones.js"></script>
+  <script>
+    /* ── teclado ── */
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowLeft')  moverIzquierda();
+      if (e.key === 'ArrowRight') moverDerecha();
+    });
+
+    const _canvas = document.getElementById('areajuego');
+    const _ctx    = _canvas.getContext('2d');
+
+    /* ══════════════════════════════════════════
+       MEDIA RODAJA DE LIMON (objeto que cae)
+       Vista de corte transversal, estilo pixel
+    ══════════════════════════════════════════ */
+    function drawRetroLemonSlice(ctx, x, y, w, h) {
+      ctx.save();
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const rx = w * 0.48;
+      const ry = h * 0.48;
+
+      /* cascara exterior amarilla */
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* anillo de cascara mas oscuro */
+      ctx.strokeStyle = '#E6A800';
+      ctx.lineWidth = w * 0.08;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx - w*0.04, ry - h*0.04, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      /* pulpa interior - blanco cremoso */
+      ctx.fillStyle = '#FFFDE0';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * 0.78, ry * 0.78, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* gajos pixel (6 triangulos) */
+      const gajoColors = ['#FFE033', '#FFD000', '#FFC400', '#FFE033', '#FFD000', '#FFC400'];
+      for (let i = 0; i < 6; i++) {
+        const a0 = (i / 6) * Math.PI * 2 - Math.PI / 2;
+        const a1 = ((i + 1) / 6) * Math.PI * 2 - Math.PI / 2;
+        const am = (a0 + a1) / 2;
+        ctx.fillStyle = gajoColors[i];
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a0) * rx * 0.76, cy + Math.sin(a0) * ry * 0.76);
+        ctx.lineTo(cx + Math.cos(am) * rx * 0.70, cy + Math.sin(am) * ry * 0.70);
+        ctx.lineTo(cx + Math.cos(a1) * rx * 0.76, cy + Math.sin(a1) * ry * 0.76);
+        ctx.closePath();
+        ctx.fill();
+
+        /* lineas divisorias de gajo */
+        ctx.strokeStyle = '#E6A800';
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a0) * rx * 0.78, cy + Math.sin(a0) * ry * 0.78);
+        ctx.stroke();
+      }
+
+      /* punto central */
+      ctx.fillStyle = '#FFB300';
+      ctx.beginPath();
+      ctx.arc(cx, cy, w * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* borde exterior nitido */
+      ctx.strokeStyle = '#B8860B';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    /* ══════════════════════════════════════════
+       VASO CON CUBOS DE HIELO
+       Se llena de limonada segun puntaje (0-10)
+    ══════════════════════════════════════════ */
+    function drawRetroGlass(ctx, x, y, w, h, score) {
+      ctx.save();
+
+      const MAX_SCORE  = 10;
+      const fillRatio  = Math.min(score / MAX_SCORE, 1);
+
+      /* base / posavasos */
+      ctx.fillStyle = '#6B3A1F';
+      ctx.fillRect(x - w*0.08, y + h*0.90, w*1.16, h*0.10);
+
+      /* forma trapezoidal del vaso */
+      const gTL = x + w*0.04,  gTR = x + w*0.96;
+      const gBL = x + w*0.18,  gBR = x + w*0.82;
+      const gTY = y,            gBY = y + h*0.90;
+
+      /* interior del vaso - fondo vacio */
+      ctx.fillStyle = '#D0EFF8';
+      ctx.beginPath();
+      ctx.moveTo(gTL, gTY); ctx.lineTo(gTR, gTY);
+      ctx.lineTo(gBR, gBY); ctx.lineTo(gBL, gBY);
+      ctx.closePath();
+      ctx.fill();
+
+      /* limonada que sube desde abajo segun puntaje */
+      if (fillRatio > 0) {
+        const liqTopY = gBY - fillRatio * (gBY - gTY);
+        const t       = fillRatio;
+        const liqL    = gBL + (gTL - gBL) * t;
+        const liqR    = gBR + (gTR - gBR) * t;
+
+        /* capas de color pixel (amarillo-verde limonada) */
+        const layers = 8;
+        for (let li = 0; li < layers; li++) {
+          const ly0 = liqTopY + li     * (gBY - liqTopY) / layers;
+          const ly1 = liqTopY + (li+1) * (gBY - liqTopY) / layers;
+          const p0  = (gBY - ly0) / (gBY - gTY);
+          const p1  = (gBY - ly1) / (gBY - gTY);
+          const ll0 = gBL + (gTL - gBL) * (1 - p0);
+          const lr0 = gBR + (gTR - gBR) * (1 - p0);
+          const ll1 = gBL + (gTL - gBL) * (1 - p1);
+          const lr1 = gBR + (gTR - gBR) * (1 - p1);
+          ctx.fillStyle = li % 2 === 0 ? '#C8DC3A' : '#B8CC2A';
+          ctx.beginPath();
+          ctx.moveTo(ll0, ly0); ctx.lineTo(lr0, ly0);
+          ctx.lineTo(lr1, ly1); ctx.lineTo(ll1, ly1);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        /* espuma en la superficie */
+        const bw = liqR - liqL;
+        ctx.fillStyle = '#EEFFAA';
+        ctx.fillRect(liqL + bw*0.08, liqTopY, bw*0.84, h*0.022);
+
+        /* burbujas pixel */
+        [0.20, 0.45, 0.68].forEach(function(bx) {
+          ctx.fillStyle = 'rgba(240,255,160,0.75)';
+          ctx.fillRect(liqL + bw*bx, liqTopY + h*0.035, w*0.045, h*0.045);
+        });
+      }
+
+      /* cubos de hielo (siempre visibles sobre la limonada) */
+      var cubes = [
+        {fx:0.18, fy:0.12, fs:0.22},
+        {fx:0.52, fy:0.08, fs:0.22},
+        {fx:0.33, fy:0.38, fs:0.20},
+        {fx:0.18, fy:0.58, fs:0.18},
+        {fx:0.54, fy:0.52, fs:0.18}
+      ];
+      cubes.forEach(function(c) {
+        var cx2 = x + w*c.fx, cy2 = y + h*c.fy, cs = w*c.fs;
+        ctx.fillStyle   = 'rgba(210,240,255,0.72)';
+        ctx.strokeStyle = '#88C8E0';
+        ctx.lineWidth   = 0.8;
+        ctx.fillRect(cx2, cy2, cs, cs);
+        ctx.strokeRect(cx2, cy2, cs, cs);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillRect(cx2+1, cy2+1, cs*0.38, cs*0.22);
+      });
+
+      /* reflejo lateral */
+      ctx.fillStyle = 'rgba(255,255,255,0.20)';
+      ctx.beginPath();
+      ctx.moveTo(gTL + w*0.04, gTY + h*0.02);
+      ctx.lineTo(gTL + w*0.18, gTY + h*0.02);
+      ctx.lineTo(gBL + w*0.12, gBY - h*0.06);
+      ctx.lineTo(gBL + w*0.02, gBY - h*0.06);
+      ctx.closePath();
+      ctx.fill();
+
+      /* contorno del vaso */
+      ctx.strokeStyle = '#5BA3C9';
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(gTL, gTY); ctx.lineTo(gTR, gTY);
+      ctx.lineTo(gBR, gBY); ctx.lineTo(gBL, gBY);
+      ctx.closePath();
+      ctx.stroke();
+
+      /* rodaja de naranja decorativa en el borde */
+      var slX = x + w*0.75, slY = y - h*0.10, slR = w*0.16;
+      ctx.fillStyle = '#FF8C00';
+      ctx.beginPath(); ctx.arc(slX, slY, slR, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFA500';
+      ctx.beginPath(); ctx.arc(slX, slY, slR*0.72, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#CC5500'; ctx.lineWidth = 0.7;
+      for (var seg = 0; seg < 6; seg++) {
+        var ang = (seg/6)*Math.PI*2;
+        ctx.beginPath();
+        ctx.moveTo(slX, slY);
+        ctx.lineTo(slX + Math.cos(ang)*slR*0.70, slY + Math.sin(ang)*slR*0.70);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#CC5500'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(slX, slY, slR, 0, Math.PI*2); ctx.stroke();
+
+      ctx.restore();
+    }
+
+    /* ══════════════════════════════════════════
+       SUELO - TABLONES DE MADERA
+    ══════════════════════════════════════════ */
+    function drawWoodFloor(ctx, cW, cH, floorH) {
+      var y0 = cH - floorH;
+      var plankColors = ['#8B5E3C','#7A5230','#9B6B45','#6B4423'];
+      var nPlanks = 8;
+      var pw = cW / nPlanks;
+
+      for (var i = 0; i < nPlanks; i++) {
+        var px = i * pw;
+        ctx.fillStyle = plankColors[i % plankColors.length];
+        ctx.fillRect(px, y0, pw + 1, floorH);
+
+        ctx.strokeStyle = '#4A2810';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(px, y0); ctx.lineTo(px, y0 + floorH); ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        ctx.lineWidth = 0.5;
+        for (var g = 0; g < 3; g++) {
+          var gx = px + 8 + g * 20;
+          ctx.beginPath();
+          ctx.moveTo(gx, y0 + 2);
+          ctx.lineTo(gx + 12, y0 + floorH - 2);
+          ctx.stroke();
+        }
+      }
+      ctx.strokeStyle = '#3B1F0A';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(cW, y0); ctx.stroke();
+    }
+
+    /* ── sobreescribir funciones de limones.js ── */
+    window.dibujarPersonaje = function() {
+      var score = (typeof puntaje !== 'undefined') ? puntaje : 0;
+      drawRetroGlass(_ctx, personajeX, personajeY, ANCHO_PERSONAJE, ALTURA_PERSONAJE, score);
+    };
+
+    window.dibujarLimon = function() {
+      drawRetroLemonSlice(_ctx, limonX, limonY, ANCHO_LIMON, ALTURA_LIMON);
+    };
+
+    window.dibujarSuelo = function() {
+      drawWoodFloor(_ctx, _canvas.width, _canvas.height, ALTURA_SUELO);
+    };
+  </script>
 </body>
 </html>
